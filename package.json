@@ -1,0 +1,34 @@
+{
+  "name": "new-alend-migrator",
+  "version": "1.0.0",
+  "description": "Migrator for aLEND to aAAVE with active debt.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zer0dot/new-alend-migrator.git"
+  },
+  "keywords": [
+    "aave",
+    "migrator",
+    "defi"
+  ],
+  "author": "zer0dot",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Zer0dot/new-alend-migrator/issues"
+  },
+  "homepage": "https://github.com/Zer0dot/new-alend-migrator#readme",
+  "dependencies": {
+    "truffle": "^5.1.51",
+    "@openzeppelin/cli": "^2.8.2",
+    "@openzeppelin/contracts-ethereum-package": "^3.0.0",
+    "@truffle/hdwallet-provider": "^1.1.1",
+    "@uniswap/sdk": "^3.0.3",
+    "create-react-app": "^4.0.0",
+    "ethers": "^5.0.19",
+    "truffle-flattener": "^1.5.0"
+  }
+}
