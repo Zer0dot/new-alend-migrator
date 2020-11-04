@@ -1,0 +1,34 @@
+{
+  "contracts": {},
+  "solidityLibs": {},
+  "proxies": {
+    "new-alend-migrator/ALendMigrator": [
+      {
+        "address": "0x331930a8D0f923AB7a06B75fBDDa9BF0854cd9E9",
+        "kind": "NonProxy",
+        "bytecodeHash": "cce953ae786d446ddb2172cc34f847f9cc6524376e9aa5f5eb9371759b0ce366"
+      },
+      {
+        "address": "0xa5C9ba78498781a19736FF0a295a57Bbaf27208D",
+        "kind": "NonProxy",
+        "bytecodeHash": "cce953ae786d446ddb2172cc34f847f9cc6524376e9aa5f5eb9371759b0ce366"
+      },
+      {
+        "address": "0x6bbC89cD1Db5a2c534d01faBd6bBF11d5E2A63D2",
+        "kind": "NonProxy",
+        "bytecodeHash": "cce953ae786d446ddb2172cc34f847f9cc6524376e9aa5f5eb9371759b0ce366"
+      },
+      {
+        "address": "0x60D577460c152B4CB7Cd5F2d507Ff8792a2e3d7B",
+        "kind": "NonProxy",
+        "bytecodeHash": "cce953ae786d446ddb2172cc34f847f9cc6524376e9aa5f5eb9371759b0ce366"
+      },
+      {
+        "address": "0x8728563B1637502cee9898A96AF4c112486fb6F5",
+        "kind": "NonProxy",
+        "bytecodeHash": "cce953ae786d446ddb2172cc34f847f9cc6524376e9aa5f5eb9371759b0ce366"
+      }
+    ]
+  },
+  "manifestVersion": "2.2"
+}

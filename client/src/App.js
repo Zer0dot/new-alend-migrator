@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import SimpleStorageContract from "./contracts/SimpleStorage.json";
+import ALendMigratorContract from "./contracts/ALendMigrator.json";
 import getWeb3 from "./getWeb3";
-import BlockchainContext from "./BlockchainContext.js";
-
+//import BlockchainContext from "./BlockchainContext.js";
+//TODO: GET USER INPUT 
 import "./App.css";
 
 function App() {
-  const [storageValue, setStorageValue] = useState(undefined);
+  const [neededAaveValue, setNeededAaveValue] = useState(undefined);
   const [web3, setWeb3] = useState(undefined);
   const [accounts, setAccounts] = useState([]);
   const [contract, setContract] = useState(undefined);
@@ -22,9 +22,9 @@ function App() {
   
         // Get the contract instance.
         const networkId = await web3.eth.net.getId();
-        const deployedNetwork = SimpleStorageContract.networks[networkId];
+        const deployedNetwork = ALendMigratorContract.networks[networkId];
         const contract = new web3.eth.Contract(
-          SimpleStorageContract.abi,
+          ALendMigratorContract.abi,
           deployedNetwork && deployedNetwork.address,
         );
   
@@ -48,13 +48,13 @@ function App() {
     const load = async () => {
 
       // Stores a given value, 5 by default.
-      await contract.methods.set(5).send({ from: accounts[0] });
+      const response = await contract.methods.calculateNeededAAVE().call({ from: "0xbc4a41FAB35600b5EE85eD087f45bB7BC317C328" });
 
       // Get the value from the contract to prove it worked.
-      const response = await contract.methods.get().call();
+      //const response = await contract.methods.get().call();
 
       // Update state with the result.
-      setStorageValue(response);
+      setNeededAaveValue(response);
     }
 
     if(typeof web3 !== 'undefined' && typeof accounts !== 'undefined' && typeof contract !== 'undefined') {
@@ -62,27 +62,29 @@ function App() {
     }
   }, [web3, accounts, contract]);
 
+  async function migrateALend() {
+    await contract.methods.migrateALend().send({ from: "0xbc4a41FAB35600b5EE85eD087f45bB7BC317C328", gasLimit: 5000000 });
+    console.log("lel");
+  }
+
   if(typeof web3 === 'undefined') {
     return <div>Loading Web3, accounts, and contract...</div>;
   }
   return (
     <div className="App">
-      <BlockchainContext.Provider value={{web3, accounts, contract}}>
-        <h1>Good to Go!</h1>
-        <p>Your Truffle Box is installed and ready.</p>
-        <h2>Smart Contract Example</h2>
-        <p>
-          If your contracts compiled and migrated successfully, below will show
-          a stored value of 5 (by default).
-        </p>
-        <ChildComponent>
-
-        </ChildComponent>
-        <p>
-          Try changing the value stored on <strong>line 40</strong> of App.js.
-        </p>
-        <div>The stored value is: {storageValue}</div>
-      </BlockchainContext.Provider>
+      <h1>Good to Go!</h1>
+      <p>Your Truffle Box is installed and ready.</p>
+      <h2>Smart Contract Example</h2>
+      <p>
+        If your contracts compiled and migrated successfully, below will show
+        a stored value of 5 (by default).
+      </p>
+      <p>
+        Try changing the value stored on <strong>line 40</strong> of App.js.
+      </p>
+      <div>The stored value is: {neededAaveValue}</div>
+      <div>succ</div>
+      <button onClick={migrateALend} >click me bro</button>
     </div>
   );
 }
