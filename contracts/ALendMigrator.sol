@@ -74,11 +74,26 @@ contract ALendMigrator is IUniswapV2Callee {
     }
 
     function calculateNeededAave() public view returns (uint256, uint256) {
+        uint256 aaveBalanceNeeded;
+        uint256 aaveBalancePlusFees;
         uint256 aLendBalance = aLend.balanceOf(msg.sender);
-        uint256 aaveBalanceNeeded = aLendBalance.div(100);
+        (uint112 aaveReserve, , ) = pair.getReserves();
 
-        //Times 100 / 99.7, + 1 to avoid Uniswap invariant error
-        uint256 aaveBalancePlusFees = aaveBalanceNeeded.mul(1000).div(997); 
+        //If the address has too much aLEND, default to using the entire AAVE reserve, with leeway to trade
+        //For the fee
+        if (aaveReserve < aLendBalance.div(100)) {
+
+            //Use the entire AAVE balance on Uniswap
+            aaveBalancePlusFees = uint256(aaveReserve);
+            aaveBalanceNeeded = aaveBalancePlusFees.mul(997).div(1000);
+        } else {
+            //uint256 aLendBalance = aLend.balanceOf(msg.sender);
+            aaveBalanceNeeded = aLendBalance.div(100);
+            //Times 100 / 99.7 to calculate fees
+            aaveBalancePlusFees = aaveBalanceNeeded.mul(1000).div(997); 
+        }
+
+        // add 1 to avoid Uniswap invariant error
         uint256 feeAmount = aaveBalancePlusFees.sub(aaveBalanceNeeded).add(1);
         return (aaveBalanceNeeded, feeAmount);
     }
@@ -114,7 +129,7 @@ contract ALendMigrator is IUniswapV2Callee {
         aAave.safeTransfer(caller, amount0);
         
         //Transfer in the caller's aLEND (REQUIRES aLend APPROVAL OF THIS CONTRACT)
-        uint256 aLendBalance = aLend.balanceOf(caller);
+        uint256 aLendBalance = amount0.mul(100);//aLend.balanceOf(caller);
         aLend.safeTransferFrom(caller, address(this), aLendBalance);
 
         //Redeem the aLEND for LEND
