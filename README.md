@@ -11,3 +11,5 @@ The above is now fixed through the use of multiple transactions.
 2. Make sure you have enough AAVE to cover the Uniswap flash swap fee (call the "CalculateNeededAave" function, it returns both the AAVE to be flash swapped AND the fee amount you must have in your wallet. When aLEND > available AAVE liquidity, the fee is supposed to be the total you need for all tx's.) 
 3. Approve the contract for aLEND and AAVE spending.
 4. Finally, just call the "MigrateALend" function and the migration will proceed automatically. For aLEND > AAVE liquidity on Uniswap, you will need to call it multiple times.
+
+## FURTHER TESTING NEEDS TO BE DONE
