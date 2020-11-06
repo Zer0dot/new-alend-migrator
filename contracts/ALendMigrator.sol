@@ -2,9 +2,8 @@ pragma solidity ^0.6.6;
 
 import "./uniswap/IUniswapV2Pair.sol";
 import "./uniswap/IUniswapV2Callee.sol";
-import "./aave/FlashLoanReceiverBase.sol";
 import "./aave/ILendingPoolAddressesProvider.sol";
-import "./aave/IlendingPool.sol";
+import "./aave/ILendingPool.sol";
 import "./aave/ILendToAaveMigrator.sol";
 import "./aave/IAToken.sol";
 import "./aave/ILendingPoolAddressesProvider.sol";
@@ -28,6 +27,8 @@ contract ALendMigrator is IUniswapV2Callee {
     ILendingPool lendingPool;
     ILendToAaveMigrator migrator;
     address lendingPoolCoreAddress;
+
+    event MigrationSuccessful(address user);
 
     constructor(
         //address _aave,
@@ -54,6 +55,7 @@ contract ALendMigrator is IUniswapV2Callee {
         aave = IERC20(_aave);
         lend = IERC20(_lend);
 
+        //Address calculation
         /*address weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
 
         address factory = address(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
@@ -71,40 +73,42 @@ contract ALendMigrator is IUniswapV2Callee {
         lend.approve(_migrator, uint256(-1));
     }
 
-    event MigrationSuccessful(address user);
-
-    function calculateNeededAAVE() external view returns (uint256) {
+    function calculateNeededAave() public view returns (uint256, uint256) {
         uint256 aLendBalance = aLend.balanceOf(msg.sender);
         uint256 aaveBalanceNeeded = aLendBalance.div(100);
 
         //Times 100 / 99.7, + 1 to avoid Uniswap invariant error
         uint256 aaveBalancePlusFees = aaveBalanceNeeded.mul(1000).div(997); 
         uint256 feeAmount = aaveBalancePlusFees.sub(aaveBalanceNeeded).add(1);
-        return feeAmount;
+        return (aaveBalanceNeeded, feeAmount);
     }
 
     function migrateALend() external {
-        uint256 aLendBalance = aLend.balanceOf(msg.sender);
-        uint256 aaveBalanceNeeded = aLendBalance.div(100);
+        (uint256 aaveBalanceNeeded, uint256 feeAmount) = calculateNeededAave();
 
-        //Times 100 / 99.7, add one to avoid Uniswap invariant error
-        uint256 aaveBalancePlusFees = aaveBalanceNeeded.mul(1000).div(997); 
-        uint256 feeAmount = aaveBalancePlusFees.sub(aaveBalanceNeeded).add(1);
-
+        //The fee is transferred in before the loan
         require(aave.balanceOf(msg.sender) >= feeAmount, "Not enough AAVE to cover flash swap fees.");
-        aave.safeTransferFrom(msg.sender, address(this), feeAmount); //The fee is transferred in before the loan
+        aave.safeTransferFrom(msg.sender, address(this), feeAmount); 
 
-        bytes memory flashData = abi.encode(msg.sender);
+        //Get the current AAVE balance to verify that the flash swap worked later
+        uint256 currentAaveBalance = aave.balanceOf(address(this));
+        bytes memory flashData = abi.encode(msg.sender, currentAaveBalance);
 
         pair.swap(aaveBalanceNeeded, 0, address(this), flashData);
     }
 
     function uniswapV2Call(address sender, uint amount0, uint amount1, bytes calldata data) external override {
-
-        (address caller) = abi.decode(data, (address));
         
+        //Verify that only the correct pair address can call this function
+        require(msg.sender == address(pair), "Only the Uniswap AAVE/ETH pair can call this function.");
+
+        (address caller, uint256 previousAaveBalance) = abi.decode(data, (address, uint256));
+
+        //Verify that the flash swap credited the contract with the amount of AAVE needed
+        require(aave.balanceOf(address(this)) > previousAaveBalance, "Flash swap did not credit AAVE.");
+    
         //Deposit the flash loaned AAVE
-        lendingPool.deposit(address(aave), amount0, 0); //Maybe use my referral code 
+        lendingPool.deposit(address(aave), amount0, 0);
         
         //Transfer the flash loaned deposited aAAVE to the user
         aAave.safeTransfer(caller, amount0);
@@ -123,7 +127,9 @@ contract ALendMigrator is IUniswapV2Callee {
         uint256 aaveToPay = aave.balanceOf(address(this));
         aave.safeTransfer(address(pair), aaveToPay); 
 
+        //Verify the aAAVE is successfully deposited and transferred
+        require(aAave.balanceOf(caller).mul(1000) >= aLendBalance.mul(1000).div(100));
+
         emit MigrationSuccessful(caller);
-        //From here on out, we're done. Godspeed.
     }
 }

@@ -1,6 +1,6 @@
 node_modules/
 
-.openzeppelin/.session
+.openzeppelin/
 
 secrets.json
 
@@ -9,3 +9,4 @@ build/
 client/
 
 src/
+
