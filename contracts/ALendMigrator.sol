@@ -76,13 +76,13 @@ contract ALendMigrator is IUniswapV2Callee {
     function calculateNeededAave() public view returns (uint256, uint256) {
         uint256 aaveBalanceNeeded;
         uint256 aaveBalancePlusFees;
+        
         uint256 aLendBalance = aLend.balanceOf(msg.sender);
         (uint112 aaveReserve, , ) = pair.getReserves();
 
         //If the address has too much aLEND, default to using the entire AAVE reserve, with leeway to trade
         //For the fee
         if (aaveReserve < aLendBalance.div(100)) {
-
             //Use the entire AAVE balance on Uniswap
             aaveBalancePlusFees = uint256(aaveReserve);
             aaveBalanceNeeded = aaveBalancePlusFees.mul(997).div(1000);
@@ -130,6 +130,11 @@ contract ALendMigrator is IUniswapV2Callee {
         
         //Transfer in the caller's aLEND (REQUIRES aLend APPROVAL OF THIS CONTRACT)
         uint256 aLendBalance = amount0.mul(100);//aLend.balanceOf(caller);
+        uint256 aLendLeftover = aLend.balanceOf(caller).sub(aLendBalance);
+        //Check if leftover aLend is less than 1 "wei" AAVE worth, if so, transfer it along
+        if(aLendLeftover < 100 && aLendLeftover > 0) {
+            aLendBalance = aLendBalance.add(aLendLeftover);
+        }
         aLend.safeTransferFrom(caller, address(this), aLendBalance);
 
         //Redeem the aLEND for LEND
