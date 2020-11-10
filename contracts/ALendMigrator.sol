@@ -52,8 +52,7 @@ contract ALendMigrator is IUniswapV2Callee {
         //If the address has too much aLEND, use the entire AAVE reserve 
         //-1 to avoid Uniswap Insufficient Liquidity
         if (aaveReserve < aLendBalance.div(100)) {
-            //Use the entire AAVE balance on Uniswap
-            aaveBalanceNeeded = uint256(aaveReserve).sub(1);//aaveBalancePlusFees.mul(997).div(1000);
+            aaveBalanceNeeded = uint256(aaveReserve).sub(1);
         } else {
             aaveBalanceNeeded = aLendBalance.div(100);
         }
@@ -61,7 +60,7 @@ contract ALendMigrator is IUniswapV2Callee {
         //Times 100 / 99.7 to calculate fees
         aaveBalancePlusFees = aaveBalanceNeeded.mul(1000).div(997);
         
-        // add 1 to avoid Uniswap invariant error
+        //Add 1 to avoid Uniswap invariant error
         uint256 feeAmount = aaveBalancePlusFees.sub(aaveBalanceNeeded).add(1);
         return (aaveBalanceNeeded, feeAmount);
     }
