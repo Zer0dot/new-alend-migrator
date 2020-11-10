@@ -42,11 +42,14 @@ contract ALendMigrator is IUniswapV2Callee {
         lend.approve(_migrator, uint256(-1));
     }
 
+    //Returns the needed AAVE to flash swap and the AAVE fee that must be paid
     function calculateNeededAave() public view returns (uint256, uint256) {
+        //Get aLendBalance and make sure it's not null
+        uint256 aLendBalance = aLend.balanceOf(msg.sender);
+        require(aLendBalance > 0, "No aLEND to migrate.");
+
         uint256 aaveBalanceNeeded;
         uint256 aaveBalancePlusFees;
-        
-        uint256 aLendBalance = aLend.balanceOf(msg.sender);
         (uint112 aaveReserve, , ) = pair.getReserves();
 
         //If the address has too much aLEND, use the entire AAVE reserve 
@@ -66,6 +69,11 @@ contract ALendMigrator is IUniswapV2Callee {
     }
 
     function migrateALend() external {
+        //Verify that aAAVE is collateral-enabled
+        ( , , , , , , , , , bool collateralEnabled) = lendingPool.getUserReserveData(_aave, msg.sender);
+        require(collateralEnabled == true, "AAVE is not collateral-enabled.");
+
+        //Get needed flash swap AAVE & fee amount
         (uint256 aaveBalanceNeeded, uint256 feeAmount) = calculateNeededAave();
 
         //The fee is transferred in before the loan
