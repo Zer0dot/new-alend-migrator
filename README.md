@@ -12,4 +12,4 @@ The above is now fixed through the use of multiple transactions.
 3. Approve the contract for aLEND and AAVE spending.
 4. Finally, just call the "MigrateALend" function and the migration will proceed automatically. For aLEND > AAVE liquidity on Uniswap, you will need to call it multiple times.
 
-## FURTHER TESTING NEEDS TO BE DONE
+## USE AT YOUR OWN RISK
