@@ -24,6 +24,8 @@ contract ALendMigrator is IUniswapV2Callee, Withdrawable {
     using SafeERC20 for IERC20;
     using SafeERC20 for IAToken;
 
+    uint16 constant refCode = 152;
+
     address constant _aave = address(0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9);
     address constant _aLend = address(0x7D2D3688Df45Ce7C552E19c27e007673da9204B8);
     address constant _aAave = address(0xba3D9687Cf50fE253cd2e1cFeEdE1d6787344Ed5);
@@ -43,6 +45,11 @@ contract ALendMigrator is IUniswapV2Callee, Withdrawable {
     ILendToAaveMigrator migrator = ILendToAaveMigrator(_migrator);
     address lendingPoolCoreAddress = provider.getLendingPoolCore();
 
+    /**
+     * @dev Emitted when a user successfully migrates their aLend to aAAVE
+     *
+     * @param user The user address who has successfully migrated.
+     */
     event MigrationSuccessful(address user);
 
     /**
@@ -117,7 +124,7 @@ contract ALendMigrator is IUniswapV2Callee, Withdrawable {
         (address caller, uint256 previousAaveBalance) = abi.decode(data, (address, uint256));
         require(aave.balanceOf(address(this)) > previousAaveBalance, "Flash swap did not credit AAVE.");
     
-        lendingPool.deposit(address(aave), amount0, 0);
+        lendingPool.deposit(address(aave), amount0, refCode);
         aAave.safeTransfer(caller, amount0);
 
         uint256 aLendBalance = amount0.mul(100);
