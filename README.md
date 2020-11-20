@@ -13,4 +13,4 @@ The above is now fixed through the use of multiple transactions.
 4. Finally, just call the "MigrateALend" function and the migration will proceed automatically. For aLEND > AAVE liquidity on Uniswap, you will need to call it multiple times.
 
 ## USE AT YOUR OWN RISK
-I'm still a beginner at this stuff!
+The code is unaudited. It is recommended to use a tool like <a href= "https://tac.dappstar.io/">this</a> or your favorite token allowance checker to revoke allowances. This is also good practice in general!
