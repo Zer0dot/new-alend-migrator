@@ -85,7 +85,7 @@ contract ALendMigrator is IUniswapV2Callee, Withdrawable {
     }
 
     /**
-     * @dev Migrates msg.sender's aLEND to aAAVE
+     * @dev Migrates msg.sender's aLEND to aAAVE, calculates fees and initiates the flash swap.
      */
     function migrateALend() external {
         // Verify that aAAVE is collateral-enabled
